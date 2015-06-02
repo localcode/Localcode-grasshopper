@@ -1,4 +1,6 @@
 import Image, ImageDraw, ImageStat
+from os import listdir
+from os.path import isfile, join
 
 def gcr(im, percentage):
     '''basic "Gray Component Replacement" function. Returns a CMYK image with 
@@ -51,10 +53,19 @@ def halftone(im, cmyk, sample, scale):
         angle += 15
     return dots
 
-im = Image.open("1_tree.jpg")
+image_dir = 'F:/Local Code/Work/Local Code - Los Angeles/08 Images/00 Background Images/batched amigos renders nov 15 12'
+new_images = 'F:/Local Code/Work/Local Code - Los Angeles/08 Images/00 Background Images/batched amigos renders nov 15 12/test'
+onlyfiles = [ f for f in listdir(image_dir) if isfile(join(image_dir,f))]
 
+im = Image.open(join(image_dir,onlyfiles[0]))
+img = Image.open(join(image_dir,onlyfiles[0])).convert('LA')
+img.save(join(new_images,onlyfiles[0]))
+
+print img
 cmyk = gcr(im, 0)
+print cmyk
+'''
 dots = halftone(im, cmyk, 10, 1)
-im.show()
 new = Image.merge('CMYK', dots)
-new.show()
+
+new.save(join(new_images,onlyfiles[0]), 'JPEG')'''
