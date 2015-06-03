@@ -1,25 +1,7 @@
 import Image, ImageDraw, ImageStat
 from os import listdir
 from os.path import isfile, join
-
-def gcr(im, percentage):
-    '''basic "Gray Component Replacement" function. Returns a CMYK image with 
-       percentage gray component removed from the CMY channels and put in the
-       K channel, ie. for percentage=100, (41, 100, 255, 0) >> (0, 59, 214, 41)'''
-    cmyk_im = im.convert('CMYK')
-    if not percentage:
-        return cmyk_im
-    cmyk_im = cmyk_im.split()
-    cmyk = []
-    for i in xrange(4):
-        cmyk.append(cmyk_im[i].load())
-    for x in xrange(im.size[0]):
-        for y in xrange(im.size[1]):
-            gray = min(cmyk[0][x,y], cmyk[1][x,y], cmyk[2][x,y]) * percentage / 100
-            for i in xrange(3):
-                cmyk[i][x,y] = cmyk[i][x,y] - gray
-            cmyk[3][x,y] = gray
-    return Image.merge('CMYK', cmyk_im)
+import pandas as pd
 
 def halftone(im, cmyk, sample, scale):
     '''Returns list of half-tone images for cmyk image. sample (pixels), 
@@ -50,22 +32,37 @@ def halftone(im, cmyk, sample, scale):
         yy=(height_half-im.size[1]*scale) / 2
         half_tone = half_tone.crop((xx, yy, xx + im.size[0]*scale, yy + im.size[1]*scale))
         dots.append(half_tone)
-        angle += 15
+        angle += 30
     return dots
 
-image_dir = 'F:/Local Code/Work/Local Code - Los Angeles/08 Images/00 Background Images/batched amigos renders nov 15 12'
-new_images = 'F:/Local Code/Work/Local Code - Los Angeles/08 Images/00 Background Images/batched amigos renders nov 15 12/test'
+image_dir = 'E:/Local Code/Work/Local Code - Los Angeles/08 Images/00 Background Images/batched amigos renders nov 15 12'
+new_images = 'E:/Local Code/Work/Local Code - Los Angeles/08 Images/00 Background Images/batched amigos renders nov 15 12/test'
 onlyfiles = [ f for f in listdir(image_dir) if isfile(join(image_dir,f))]
 
-im = Image.open(join(image_dir,onlyfiles[0]))
-img = Image.open(join(image_dir,onlyfiles[0])).convert('LA')
-img.save(join(new_images,onlyfiles[0]))
+csv_file = 'Filename and Funding Only_result.csv'
 
-print img
-cmyk = gcr(im, 0)
-print cmyk
-'''
-dots = halftone(im, cmyk, 10, 1)
-new = Image.merge('CMYK', dots)
+def remap(number, old_interval, new_interval):
+    delta = float(old_interval[1] - old_interval[0])
+    t = (number-old_interval[0]) / delta
+    new_delta = float(new_interval[1] - new_interval[0])
+    return new_delta * t + new_interval[0]
+    
 
-new.save(join(new_images,onlyfiles[0]), 'JPEG')'''
+df = pd.DataFrame.from_csv(csv_file)
+max_val = df['h-actual'].values.max()
+min_val = df['h-actual'].values.min()
+old_interval = [min_val, max_val]
+# Setup a new interval
+new_interval = [50, 5]
+
+all_vals = df['h-actual'].values
+
+for index, image in enumerate(onlyfiles):
+    im = Image.open(join(image_dir,image))
+    img = Image.open(join(image_dir,image)).convert('L')
+    
+    value = remap(all_vals[index], old_interval, new_interval)
+    dots = halftone(im, img, int(value), 1)
+    new = Image.merge('L', dots)
+    
+    new.save(join(new_images,image), 'PNG')
