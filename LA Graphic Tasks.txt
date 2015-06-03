@@ -1,6 +1,6 @@
 Local Code LA Graphic Tasks
 
-	Circles to hatches
+	Circles to hatches - underway
 
 	Canopy Shadow/s
 	
@@ -12,5 +12,5 @@ Local Code LA Graphic Tasks
 	
 	Flowlines (Carlos)
 	
-	
+	Bus stops - traffic arrows.
 	
