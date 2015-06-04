@@ -25,12 +25,12 @@ ds.config.siteRadius = 150
 ## get the id of polygon of interest from a GIS program
 ## 'getSiteJson' returns everything within 'siteRadius' of the polygon 'id'
 ## on your site layer. It is returned as a string in geoJSON format.
-def batchSites(numSites, file_path):
-    for n in range(0,(numSites)):
+def batchSites(start, numSites, file_path):
+    for n in range(start,(numSites)):
         mysiteJson = ds.getSiteJson(id=n)
         f=open(file_path+str(n)+'.txt','w')
         f.writelines(mysiteJson)
         f.close()
 
 file_path = 'E:/Local Code/Work/Local Code - Los Angeles/02 geoJSON/15_06_03/'
-batchSites(768, file_path) #or any number of sites
+batchSites(390, 768, file_path) #or any number of sites
